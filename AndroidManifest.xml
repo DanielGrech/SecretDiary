@@ -11,7 +11,7 @@
     android:name="DiaryApplication"
     android:theme="@android:style/Theme.Light.NoTitleBar">
     
-        <activity android:name=".MainActivity"
+        <activity android:name=".Activities.MainActivity"
             android:label="@string/app_name">
             
             <intent-filter>
@@ -21,7 +21,7 @@
             
         </activity>
         
-        <activity android:name=".LoginActivity"
+        <activity android:name=".Activities.LoginActivity"
         	android:label="Secret Diary">
         	<intent-filter>
 	            <action android:name="android.intent.action.SEND" />
@@ -30,21 +30,21 @@
 	        </intent-filter>
         </activity>
 
-		<activity android:name=".SetupActivity"
+		<activity android:name=".Activities.SetupActivity"
         	android:label="Setup" />
         	
-        <activity android:name=".EntryListActivity"
+        <activity android:name=".Activities.EntryListActivity"
         	android:label="Entry List">
         	
         	<meta-data android:name="android.app.default_searchable"
-                   android:value=".SearchActivity" />
+                   android:value=".Activities.SearchActivity" />
                    	
        	</activity>
 
-		<activity android:name=".EntryActivity"
+		<activity android:name=".Activities.EntryActivity"
         	android:label="New Entry" />
         	
-        	<activity android:name=".SearchActivity"
+        	<activity android:name=".Activities.SearchActivity"
         		android:label="Search" >
         	<intent-filter>
 	            <action android:name="android.intent.action.SEARCH" />
