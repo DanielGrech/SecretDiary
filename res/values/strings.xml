@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, LoginActivity!</string>
+    <string name="app_name">Secret Diary</string>
+    <string name="password_passage">The quick brown fox jumps over the lazy dog</string>
+    <string name="welcome_message">Please enter and confirm a password below then click on the image above</string>
+</resources>

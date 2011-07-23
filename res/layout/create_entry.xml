@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    
+    <com.DGSD.SecretDiary.ActionBar.ActionBar
+        android:id="@+id/actionbar"
+        style="@style/ActionBarCompat" />
+    
+    <LinearLayout
+    	android:layout_width="fill_parent"
+    	android:layout_height="0dip"
+    	android:layout_weight="1"
+    	android:orientation="vertical">
+	    <TextView 
+	    	android:id="@+id/KeyHeading"
+	    	android:layout_width="fill_parent"
+	    	android:layout_height="wrap_content"
+	    	android:padding="2dip"
+	    	android:textAppearance="@android:style/TextAppearance.Large"
+	    	android:text="Title"/>	
+	    	
+	   	<TextView 
+	    	android:id="@+id/KeySubtitle"
+	    	android:layout_width="fill_parent"
+	    	android:layout_height="wrap_content"
+	    	android:padding="2dip"
+	    	android:textAppearance="@android:style/TextAppearance.Small"
+	    	android:text="This is the key value you will see in the list"/>	
+	   
+	   <EditText  
+	    	android:id="@+id/key"
+		    android:layout_width="fill_parent" 
+		    android:layout_height="0dip"
+		    android:layout_weight="1"
+		    android:hint="Key"
+		    android:imeOptions="actionNext"
+		    android:layout_gravity="center"/>
+   </LinearLayout>
+   
+	<LinearLayout
+    	android:layout_width="fill_parent"
+    	android:layout_height="0dip"
+    	android:layout_weight="3"
+    	android:orientation="vertical">
+	    <TextView 
+	    	android:id="@+id/ValueHeading"
+	    	android:layout_width="fill_parent"
+	    	android:layout_height="wrap_content"
+	    	android:padding="2dip"
+	    	android:textAppearance="@android:style/TextAppearance.Large"
+	    	android:text="Value"/>	
+	    	
+	   	<TextView 
+	    	android:id="@+id/ValueSubtitle"
+	    	android:layout_width="fill_parent"
+	    	android:layout_height="wrap_content"
+	    	android:padding="2dip"
+	    	android:textAppearance="@android:style/TextAppearance.Small"
+	    	android:text="The value you want to keep safe"/>	
+	   
+	   <EditText  
+	    	android:id="@+id/value"
+		    android:layout_width="fill_parent" 
+		    android:layout_height="0dip"
+		    android:layout_weight="1"
+		    android:imeOptions="actionDone"
+		    android:gravity="top|left"/>
+   </LinearLayout>
+
+</LinearLayout>
