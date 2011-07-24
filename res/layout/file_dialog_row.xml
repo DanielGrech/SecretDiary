@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent" 
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:orientation="horizontal">
+
+    <ImageView 
+        android:id="@+id/fdrowimage"
+        android:layout_height="fill_parent" 
+        android:layout_width="wrap_content"
+        android:paddingRight="5dp" 
+        android:paddingLeft="3dp"/>
+        
+    <TextView
+        android:id="@+id/fdrowtext"  
+        android:text="@+id/fdrowtext" 
+        android:layout_width="wrap_content"
+        android:layout_toRightOf="@+id/fdrowimage"
+        android:gravity="left|center_vertical" 
+        android:layout_height="fill_parent"
+        android:textSize="23dp"></TextView> 
+
+</LinearLayout>

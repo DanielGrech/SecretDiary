@@ -54,6 +54,10 @@
 	        <meta-data android:name="android.app.searchable"
 	                   android:resource="@xml/searchable"/>
         </activity>
+        
+        <activity 
+            android:label="File Activity" 
+            android:name=".Activities.FileActivity"/>
     </application>
     
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />

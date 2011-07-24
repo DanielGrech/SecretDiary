@@ -67,18 +67,23 @@
 		    	android:visibility="gone"
 		    	android:layout_below="@id/value"/>    
 		    	
-		   	<GridView 
-			    android:id="@+id/image_grid"
+		   	<com.DGSD.SecretDiary.GalleryExt 
+			    android:id="@+id/image_gallery"
 			    android:layout_width="fill_parent" 
 			    android:layout_height="wrap_content"
-			    android:columnWidth="90dp"
-			    android:numColumns="auto_fit"
-			    android:verticalSpacing="10dp"
-			    android:horizontalSpacing="10dp"
-			    android:stretchMode="columnWidth"
 			    android:gravity="center"
 			    android:visibility="gone"
 			    android:layout_below="@id/image_heading"/>
+			    
+			<TextView 
+		    	android:id="@+id/file_heading"
+		    	android:layout_width="fill_parent"
+		    	android:layout_height="wrap_content"
+		    	android:padding="2dip"
+		    	android:textAppearance="@android:style/TextAppearance.Large"
+		    	android:text="Other Files"
+		    	android:visibility="gone"
+		    	android:layout_below="@id/image_gallery"/>    
 			    
 	   </RelativeLayout>
 	   

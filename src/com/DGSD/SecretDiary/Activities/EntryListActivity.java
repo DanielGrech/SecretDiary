@@ -174,6 +174,7 @@ public class EntryListActivity extends Activity{
 				intent.putExtra(Intent.EXTRA_SUBJECT, vh.key);
 				intent.putExtra(Intent.EXTRA_TEXT, vh.value);
 				intent.putExtra(EntryActivity.EXTRA_IMG_URI, vh.imgUri);
+				intent.putExtra(EntryActivity.EXTRA_FILES, vh.files);
 
 				startActivity(intent);
 
@@ -376,6 +377,7 @@ public class EntryListActivity extends Activity{
 							final int keyCol = cursor.getColumnIndex(Database.C_KEY);
 							final int valCol = cursor.getColumnIndex(Database.C_VALUE);
 							final int imgCol = cursor.getColumnIndex(Database.C_IMG_URI);
+							final int fileCol = cursor.getColumnIndex(Database.C_FILES);
 
 							final String pword = mApplication.getPassword();
 
@@ -391,7 +393,8 @@ public class EntryListActivity extends Activity{
 													Encryption.decrypt(pword, cursor.getString(keyCol)), 
 													Encryption.decrypt(pword, cursor.getString(valCol)), 
 													cursor.getString(dateCol),
-													Encryption.decrypt(pword,  cursor.getString(imgCol))));
+													Encryption.decrypt(pword,  cursor.getString(imgCol)),
+													Encryption.decrypt(pword,  cursor.getString(fileCol))));
 								} catch (Exception e) {
 									Toast.makeText(EntryListActivity.this, "Error decrypting values", 
 											Toast.LENGTH_SHORT).show();
@@ -443,13 +446,15 @@ public class EntryListActivity extends Activity{
 		public String value;
 		public String date;
 		public String imgUri;
+		public String files;
 
-		public ViewHolder(String i, String k, String v, String d, String u) {
+		public ViewHolder(String i, String k, String v, String d, String u, String f) {
 			id = i;
 			key = k;
 			value = v;
 			date = d;
 			imgUri = u;
+			files = f;
 		}
 	}
 

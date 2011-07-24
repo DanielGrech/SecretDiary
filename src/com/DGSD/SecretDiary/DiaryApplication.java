@@ -12,8 +12,6 @@
 
 package com.DGSD.SecretDiary;
 
-import java.util.List;
-
 import android.app.Application;
 import android.content.ContentValues;
 
@@ -40,7 +38,7 @@ public class DiaryApplication extends Application{
 		mDatabase = new Database(this);
 	}
 
-	public boolean addEntry(String key, String value, String uris) {
+	public boolean addEntry(String key, String value, String uris, String files) {
 		boolean retval = true;
 
 		if(mDatabase == null) {
@@ -51,6 +49,7 @@ public class DiaryApplication extends Application{
 				values.put(Database.C_KEY, Encryption.encrypt(mPassword, key));
 				values.put(Database.C_VALUE, Encryption.encrypt(mPassword, value));
 				values.put(Database.C_IMG_URI, Encryption.encrypt(mPassword, uris));
+				values.put(Database.C_FILES, Encryption.encrypt(mPassword, files));
 				values.put(Database.C_DATE, 
 						String.valueOf(System.currentTimeMillis()));
 			}catch(Exception e) {
@@ -63,7 +62,7 @@ public class DiaryApplication extends Application{
 		return retval;
 	}
 
-	public int updateEntry(int id, String key, String value, String uris) {
+	public int updateEntry(int id, String key, String value, String uris, String files) {
 		int retval;
 
 		if(mDatabase == null) {
@@ -75,6 +74,7 @@ public class DiaryApplication extends Application{
 				values.put(Database.C_KEY, Encryption.encrypt(mPassword, key));
 				values.put(Database.C_VALUE, Encryption.encrypt(mPassword, value));
 				values.put(Database.C_IMG_URI, Encryption.encrypt(mPassword, uris));
+				values.put(Database.C_FILES, Encryption.encrypt(mPassword, files));
 				values.put(Database.C_DATE, 
 						String.valueOf(System.currentTimeMillis()));
 			}catch(Exception e) {
