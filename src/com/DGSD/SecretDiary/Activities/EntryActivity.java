@@ -1,35 +1,36 @@
-/*
- * TODO:
- * 		Add location
- * 		View value in list
- * 		Add photo/video
- * 		Backup manager
- * 		Search
- * 		Tags for each note
- *		Password hint on login screen! 	
- * 		Change password (Unencrypt + reencrypt all!)
- */
-
 package com.DGSD.SecretDiary.Activities;
+
+import java.io.File;
+import java.io.FileNotFoundException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.provider.MediaStore.Images.Media;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.DGSD.SecretDiary.DiaryApplication;
 import com.DGSD.SecretDiary.R;
+import com.DGSD.SecretDiary.Utils;
 import com.DGSD.SecretDiary.ActionBar.ActionBar;
 import com.DGSD.SecretDiary.ActionBar.ActionBar.AbstractAction;
 
 public class EntryActivity extends Activity{
 
 	public static final String EXTRA_ID = "extra_id";
+	
+	private static final int GET_CAMERA_IMAGE = 0;
+
+	private static final int GET_GALLERY_IMAGE = 1;
 	
 	private DiaryApplication mApplication;
 
@@ -39,6 +40,14 @@ public class EntryActivity extends Activity{
 
 	private TextView mValueView;
 
+	private ImageButton mCameraButton;
+	
+	private ImageButton mGalleryButton;
+	
+	private ImageButton mDocumentButton;
+	
+	private ImageButton mLocationButton;
+	
 	private String mExistingId;
 
 	@Override
@@ -56,6 +65,14 @@ public class EntryActivity extends Activity{
 		mKeyView = (TextView) findViewById(R.id.key);
 
 		mValueView = (TextView) findViewById(R.id.value);
+		
+		mCameraButton = (ImageButton) findViewById(R.id.camera_button);
+		
+		mGalleryButton = (ImageButton) findViewById(R.id.gallery_button);
+		
+		mDocumentButton = (ImageButton) findViewById(R.id.document_button);
+		
+		mLocationButton = (ImageButton) findViewById(R.id.location_button);
 
 		extractDataFromIntent(getIntent().getExtras());
 
@@ -65,6 +82,8 @@ public class EntryActivity extends Activity{
 		}
 
 		setupActionBar();
+		
+		setupAttachmentBar();
 	}
 
 	@Override
@@ -74,6 +93,44 @@ public class EntryActivity extends Activity{
 		outState.putString("key", mKeyView.getText().toString());
 
 		outState.putString("value", mValueView.getText().toString());
+	}
+	
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+
+		switch(requestCode) {
+			case GET_CAMERA_IMAGE:
+				if (resultCode == Activity.RESULT_OK) {
+					final File file = Utils.getTempFile(this);
+
+					try {
+						Uri u = Uri.parse(Media.insertImage(getContentResolver(),
+								file.getAbsolutePath(), null, null));
+						
+						System.err.println("URI = " + u);
+						
+						file.delete();
+					} catch (FileNotFoundException e) {
+						e.printStackTrace();
+					} catch (SecurityException e) {
+						e.printStackTrace();
+					}
+				}
+				else {
+					System.err.println("Picture not taken");
+				}
+				break;
+			case GET_GALLERY_IMAGE: 
+				if (resultCode == Activity.RESULT_OK) {
+					Uri imageUri = intent.getData();
+
+					System.err.println("FILE AT: " + Utils.getPath(this, imageUri));
+				}
+				else {
+					System.err.println("Picture not chosen!");
+				}
+				break;
+		}
 	}
 	
 	@Override
@@ -205,5 +262,23 @@ public class EntryActivity extends Activity{
 				}
 			}
 		});
+
+	}
+
+	private void setupAttachmentBar() {
+		mCameraButton.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View v) {
+				takePhoto();
+			}
+		});
+	}
+	
+	private void takePhoto(){
+		final Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+		intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(Utils.getTempFile(this)) ); 
+
+		startActivityForResult(intent, GET_CAMERA_IMAGE);
 	}
 }

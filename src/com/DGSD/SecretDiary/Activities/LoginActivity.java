@@ -23,6 +23,10 @@ import com.DGSD.SecretDiary.R;
 public class LoginActivity extends Activity {
 
 	public static final String EXTRA_INTERNAL = "internal_flag";	
+	
+	private static final String KEY_LAST_ALERT_TITLE = "alert_title";
+
+	private static final String KEY_LAST_ALERT_MESSAGE = "alert_message";
 
 	private EditText mPasswordField;
 
@@ -33,6 +37,12 @@ public class LoginActivity extends Activity {
 	private SharedPreferences mPrefs;
 
 	private DiaryApplication mApplication;
+	
+	private AlertDialog currentDialog;
+
+	private String mLastAlertTitle;
+
+	private String mLastAlertMessage;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -107,8 +117,41 @@ public class LoginActivity extends Activity {
 		} else {
 			mHintButton.setVisibility(View.GONE);
 		}
+		
+		restoreDialog(savedInstanceState);
+	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		if(currentDialog != null && currentDialog.isShowing()){
+			outState.putString(KEY_LAST_ALERT_TITLE, mLastAlertTitle);
+			outState.putString(KEY_LAST_ALERT_MESSAGE, mLastAlertMessage);
+		}
+	}
+	
+	@Override
+	public void onStop() {
+		if(currentDialog != null) {
+			currentDialog.dismiss();
+			currentDialog = null;
+		}
+
+		super.onStop();
 	}
 
+	private void restoreDialog(Bundle bundle) {
+		if(bundle != null) {
+			mLastAlertTitle = bundle.getString(KEY_LAST_ALERT_TITLE);
+
+			mLastAlertMessage = bundle.getString(KEY_LAST_ALERT_MESSAGE);
+
+			if(mLastAlertTitle != null && mLastAlertMessage != null) {
+				showDialog(mLastAlertTitle, mLastAlertMessage);
+			}
+		}
+	}
+	
 	private void showDialog(String title, String message) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -121,7 +164,13 @@ public class LoginActivity extends Activity {
 			}
 		});
 
-		builder.create().show();
+		currentDialog = builder.create();
+
+		mLastAlertTitle = title;
+		
+		mLastAlertMessage = message;
+		
+		currentDialog.show();
 	}
 
 	private String unlock(String password) throws Exception{

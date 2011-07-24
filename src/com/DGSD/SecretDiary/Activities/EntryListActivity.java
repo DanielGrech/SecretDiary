@@ -332,9 +332,10 @@ public class EntryListActivity extends Activity{
 
 		private boolean hasError;
 
-		private final String[] FROM = { Database.C_DATE, Database.C_KEY, Database.C_ID };
+		private final String[] FROM = { Database.C_DATE, Database.C_KEY, 
+				Database.C_VALUE, Database.C_ID };
 
-		private final int[] TO = { R.id.date, R.id.key_text };
+		private final int[] TO = { R.id.date, R.id.key_text, R.id.value_text };
 
 		public LoadEntriesTask() {
 			hasError = false;
@@ -405,6 +406,17 @@ public class EntryListActivity extends Activity{
 									e.printStackTrace();
 								}
 
+								return true;
+							} else if(columnIndex == valCol) {
+								try {
+									((TextView)view).setText(Encryption.decrypt(pword, 
+											cursor.getString(columnIndex)) );
+								} catch (Exception e) {
+									Toast.makeText(EntryListActivity.this, "Error decrypting values", 
+											Toast.LENGTH_SHORT).show();
+									e.printStackTrace();
+								}
+								
 								return true;
 							} else {
 								return false;

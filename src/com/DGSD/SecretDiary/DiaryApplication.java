@@ -1,3 +1,15 @@
+/*
+ * TODO:
+ * 		Add location
+ * 		Add photo/video
+ * 		Backup manager
+ * 		Search
+ * 		Tags for each note
+ * 			- Colored tags in list
+ * 		Change password (Unencrypt + reencrypt all!)
+ */
+
+
 package com.DGSD.SecretDiary;
 
 import android.app.Application;
