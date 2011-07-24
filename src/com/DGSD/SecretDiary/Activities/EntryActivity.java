@@ -213,6 +213,10 @@ public class EntryActivity extends Activity{
 				mFiles = new LinkedList<String>(tempFiles);
 			}
 		}
+		
+		setupViews();
+		
+		setupActionBar();
 	}
 
 	@Override
@@ -236,13 +240,6 @@ public class EntryActivity extends Activity{
 		outState.putDouble("latitude", mLocation[0]);
 		
 		outState.putDouble("longitude", mLocation[1]);
-	}
-
-	@Override
-	public void onStart() {
-		super.onStart();
-		setupViews();
-		setupActionBar();
 	}
 	
 

@@ -6,10 +6,10 @@
     <uses-sdk android:minSdkVersion="8" />
 
     <application 
-    android:icon="@drawable/icon" 
-    android:label="@string/app_name"
-    android:name="DiaryApplication"
-    android:theme="@android:style/Theme.Light.NoTitleBar">
+	    android:icon="@drawable/icon" 
+	    android:label="@string/app_name"
+	    android:name="DiaryApplication"
+	    android:theme="@style/Theme.TiledBackground">
     
         <activity android:name=".Activities.MainActivity"
             android:label="@string/app_name">

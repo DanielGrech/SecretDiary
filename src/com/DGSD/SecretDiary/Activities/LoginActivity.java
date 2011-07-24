@@ -59,7 +59,7 @@ public class LoginActivity extends Activity {
 		mUnlockImage = (ImageButton) findViewById(R.id.unlock);
 
 		mHintButton = (ImageButton) findViewById(R.id.hint_button);
-
+		
 		mApplication.setPasswordHint(mPrefs.getString(DiaryApplication.KEY_PASSWORD_HINT, 
 				null));
 

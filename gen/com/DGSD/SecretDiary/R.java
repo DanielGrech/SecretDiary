@@ -99,18 +99,20 @@ containing a value of this type.
         public static final int actionbar_btn_pressed=0x7f020004;
         public static final int arrow_down=0x7f020005;
         public static final int arrow_up=0x7f020006;
-        public static final int copy=0x7f020007;
-        public static final int file=0x7f020008;
-        public static final int file_large=0x7f020009;
-        public static final int folder=0x7f02000a;
-        public static final int ic_menu_archive=0x7f02000b;
-        public static final int icon=0x7f02000c;
-        public static final int popup=0x7f02000d;
-        public static final int secret_icon=0x7f02000e;
-        public static final int secret_icon_large=0x7f02000f;
-        public static final int selector=0x7f020010;
-        public static final int selector_image=0x7f020011;
-        public static final int wave=0x7f020012;
+        public static final int background_repeat=0x7f020007;
+        public static final int background_tile=0x7f020008;
+        public static final int copy=0x7f020009;
+        public static final int file=0x7f02000a;
+        public static final int file_large=0x7f02000b;
+        public static final int folder=0x7f02000c;
+        public static final int ic_menu_archive=0x7f02000d;
+        public static final int icon=0x7f02000e;
+        public static final int popup=0x7f02000f;
+        public static final int secret_icon=0x7f020010;
+        public static final int secret_icon_large=0x7f020011;
+        public static final int selector=0x7f020012;
+        public static final int selector_image=0x7f020013;
+        public static final int wave=0x7f020014;
     }
     public static final class id {
         public static final int about=0x7f0b0031;
@@ -214,6 +216,7 @@ containing a value of this type.
         public static final int Animations_PopUpMenu_Left=0x7f090010;
         public static final int Animations_PopUpMenu_Reflect=0x7f090012;
         public static final int Animations_PopUpMenu_Right=0x7f090011;
+        public static final int Theme_TiledBackground=0x7f090013;
         public static final int TitleText=0x7f090005;
     }
     public static final class xml {

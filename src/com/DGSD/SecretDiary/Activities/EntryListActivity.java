@@ -177,6 +177,8 @@ public class EntryListActivity extends Activity{
 				intent.putExtra(EntryActivity.EXTRA_LAT, vh.lat);
 				intent.putExtra(EntryActivity.EXTRA_LONG, vh.lon);
 
+				mActionBar.setProgressBarVisibility(View.VISIBLE);
+				
 				startActivity(intent);
 
 			}

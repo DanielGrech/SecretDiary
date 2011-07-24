@@ -15,7 +15,8 @@
 		<TextView android:id="@+id/path" android:layout_width="fill_parent"
 			android:layout_height="wrap_content" android:layout_below="@id/actionbar"/>
 		<ListView android:id="@android:id/list" android:layout_width="fill_parent"
-			android:layout_height="fill_parent"  android:layout_below="@id/path" />
+			android:layout_height="fill_parent"  android:layout_below="@id/path" 
+			android:cacheColorHint="@android:color/transparent"/>
 		<TextView android:id="@android:id/empty"
 			android:layout_width="fill_parent" android:layout_height="fill_parent"
 			android:text="No Data"  android:layout_below="@id/actionbar"
