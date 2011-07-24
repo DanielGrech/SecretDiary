@@ -84,6 +84,15 @@
 		    	android:text="Other Files"
 		    	android:visibility="gone"
 		    	android:layout_below="@id/image_gallery"/>    
+		    	
+		   <com.DGSD.SecretDiary.GalleryExt 
+			    android:id="@+id/file_gallery"
+			    android:layout_width="fill_parent" 
+			    android:layout_height="wrap_content"
+			    android:gravity="center"
+			    android:visibility="gone"
+			    android:layout_below="@id/file_heading"
+			    android:spacing="1dp"/>
 			    
 	   </RelativeLayout>
 	   

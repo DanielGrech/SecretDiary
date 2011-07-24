@@ -7,7 +7,6 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -29,6 +28,7 @@ import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.Gallery;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,17 +44,21 @@ import com.DGSD.SecretDiary.QuickActions.QuickAction;
 public class EntryActivity extends Activity{
 
 	public static final int REQUEST_SAVE = 1337;
-	
+
 	public static final String EXTRA_ID = "extra_id";
-	
+
 	public static final String EXTRA_IMG_URI = "extra_img_uri";
-	
+
 	public static final String EXTRA_FILES = "extra_files";
-	
+
 	private static final int GET_CAMERA_IMAGE = 0;
 
 	private static final int GET_GALLERY_IMAGE = 1;
 	
+	private static final int IMAGE_GALLERY = 0;
+	
+	private static final int FILE_GALLERY = 1;
+
 	private DiaryApplication mApplication;
 
 	private ActionBar mActionBar;
@@ -62,27 +66,31 @@ public class EntryActivity extends Activity{
 	private EditText mKeyView;
 
 	private EditText mValueView;
-	
+
 	private String mExistingId;
-	
+
 	private TextView mImageTitle;
-	
+
 	private TextView mFileTitle;
-	
+
 	private GalleryExt mImageGallery;
-	
+
+	private GalleryExt mFileGallery;
+
 	private List<String> mUris;
-	
+
 	private List<String> mFiles;
-	
-	private ImageAdapter mAdapter;
-	
+
+	private GalleryAdapter mImageAdapter;
+
+	private GalleryAdapter mFileAdapter;
+
 	private boolean mChangedImage;
-	
+
 	private boolean mChangedFile;
-	
+
 	private QuickAction mQuickAction;
-	
+
 	//Action to delete an image
 	private final ActionItem mDeleteAction = new ActionItem();
 
@@ -101,44 +109,45 @@ public class EntryActivity extends Activity{
 		mKeyView = (EditText) findViewById(R.id.key);
 
 		mValueView = (EditText) findViewById(R.id.value);
-		
+
 		mImageTitle = (TextView) findViewById(R.id.image_heading);
-		
+
 		mFileTitle = (TextView) findViewById(R.id.file_heading);
-		
+
 		mImageGallery = (GalleryExt) findViewById(R.id.image_gallery);
-		
+
+		mFileGallery = (GalleryExt) findViewById(R.id.file_gallery);
+
 		mUris = new LinkedList<String>();
-		
+
 		mFiles = new LinkedList<String>();
-		
+
 		extractDataFromIntent(getIntent().getExtras());
 
 		if(savedInstanceState != null) {
+			mChangedImage = savedInstanceState.getBoolean("changed_image", true);
+			mChangedFile = savedInstanceState.getBoolean("changed_file", true);
+
 			mKeyView.setText(savedInstanceState.getString("key"));
 			mKeyView.setText(savedInstanceState.getString("value"));
 			List<String> tempUris = Utils.unjoin(savedInstanceState.getString("uris"), " ");
 			List<String> tempFiles = Utils.unjoin(savedInstanceState.getString("files"), " ");
-			
+
 			if(tempUris == null) {
 				mUris = new LinkedList<String>();
 			} else {
 				mUris = new LinkedList<String>(tempUris);
 			}
-			
+
 			if(tempFiles == null) {
 				mFiles = new LinkedList<String>();
 			} else {
 				mFiles = new LinkedList<String>(tempFiles);
 			}
 		}
-		
-		mChangedImage = false;
-		
-		mChangedFile = false;
 
 		setupViews();
-		
+
 		setupActionBar();
 	}
 
@@ -149,19 +158,26 @@ public class EntryActivity extends Activity{
 		outState.putString("key", mKeyView.getText().toString());
 
 		outState.putString("value", mValueView.getText().toString());
-		
+
 		outState.putString("uris", Utils.join(mUris, " "));
-		
+
 		outState.putString("files", Utils.join(mFiles, " "));
+
+		outState.putBoolean("changed_image", mChangedImage);
+
+		outState.putBoolean("changed_file", mChangedFile);
 	}
-	
+
+
 	@Override
 	public void onStop() {
-		mAdapter = null;
-		
+		mImageAdapter = null;
+
+		mFileAdapter = null;
+
 		super.onStop();
 	}
-	
+
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		switch(requestCode) {
@@ -170,30 +186,36 @@ public class EntryActivity extends Activity{
 					final File file = Utils.getTempFile(this);
 
 					try {
-						
+
 						String uri = Media.insertImage(getContentResolver(),
 								file.getAbsolutePath(), null, null);
-						
+
 						System.err.println("MY URI IS: " + uri);
-						
-						mUris.add( uri );
-						
-						mChangedImage = true;
-						
-						mImageTitle.setVisibility(View.VISIBLE);
-						
-						mImageGallery.setVisibility(View.VISIBLE);
-						
-						if(mAdapter != null) {
-							System.err.println("NOTIFYING ADAPTER!");
-							mAdapter.notifyDataSetChanged();
-						} else {
-							mAdapter = new ImageAdapter(this);
-							mImageGallery.setAdapter(mAdapter);
+
+						if(mUris.contains(uri)) {
+							Toast.makeText(this, "Image already added", 
+									Toast.LENGTH_SHORT).show();
+							return;
 						}
-						
+
+						mUris.add( uri );
+
+						mChangedImage = true;
+
+						mImageTitle.setVisibility(View.VISIBLE);
+
+						mImageGallery.setVisibility(View.VISIBLE);
+
+						if(mImageAdapter != null) {
+							System.err.println("NOTIFYING ADAPTER!");
+							mImageAdapter.notifyDataSetChanged();
+						} else {
+							mImageAdapter = new GalleryAdapter(this, GalleryAdapter.IMAGE_ONLY);
+							mImageGallery.setAdapter(mImageAdapter);
+						}
+
 						file.delete();
-						
+
 					} catch (FileNotFoundException e) {
 						e.printStackTrace();
 					} catch (SecurityException e) {
@@ -206,53 +228,75 @@ public class EntryActivity extends Activity{
 				break;
 			case GET_GALLERY_IMAGE: 
 				if (resultCode == Activity.RESULT_OK) {
-					String imageUri = intent.getDataString();
+					String uri = intent.getDataString();
 
-					System.err.println("URI IS: " + imageUri);
-					
-					mUris.add( imageUri );
-					
+					System.err.println("URI IS: " + uri);
+
+					if(mUris.contains(uri)) {
+						Toast.makeText(this, "Image already added", 
+								Toast.LENGTH_SHORT).show();
+						return;
+					}
+
+					mUris.add(uri);
+
 					mChangedImage = true;
-					
+
 					mImageTitle.setVisibility(View.VISIBLE);
-					
+
 					mImageGallery.setVisibility(View.VISIBLE);
-					
-					if(mAdapter != null) {
+
+					if(mImageAdapter != null) {
 						System.err.println("NOTIFYING ADAPTER!");
-						mAdapter.notifyDataSetChanged();
+						mImageAdapter.notifyDataSetChanged();
 					} else {
-						mAdapter = new ImageAdapter(this);
-						mImageGallery.setAdapter(mAdapter);
+						mImageAdapter = new GalleryAdapter(this, GalleryAdapter.IMAGE_ONLY);
+						mImageGallery.setAdapter(mImageAdapter);
 					}
 				}
 				else {
 					System.err.println("Picture not chosen!");
 				}
 				break;
-				
+
 			case REQUEST_SAVE:
 				if (resultCode == Activity.RESULT_OK) {
 					String filePath = intent.getStringExtra(FileActivity.RESULT_PATH);
 
-					mFileTitle.setVisibility(View.VISIBLE);
-					
+					if(mFiles.contains(filePath)) {
+						Toast.makeText(this, "File already added", 
+								Toast.LENGTH_SHORT).show();
+						return;
+					}
+
 					mFiles.add(filePath);
-					
+
 					mChangedFile = true;
+
+					mFileTitle.setVisibility(View.VISIBLE);
+
+					mFileGallery.setVisibility(View.VISIBLE);
+
+					if(mFileAdapter != null) {
+						System.err.println("NOTIFYING ADAPTER!");
+						mFileAdapter.notifyDataSetChanged();
+					} else {
+						mFileAdapter = new GalleryAdapter(this, GalleryAdapter.IMAGE_WITH_TEXT);
+						mFileGallery.setAdapter(mFileAdapter);
+					}
 
 				} else if (resultCode == Activity.RESULT_CANCELED) {
 					//User cancelled/pressed back button
 				}
-				
+
 				break;
 		}
 	}
-	
+
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event)  {
-	    if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-	    	String key = mKeyView.getText().toString();
+		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
+			String key = mKeyView.getText().toString();
 			String value = mValueView.getText().toString();
 
 			//If we have added an image or file, we definitely want to ask..
@@ -262,19 +306,19 @@ public class EntryActivity extends Activity{
 					//There is no data, so let them exit
 					return super.onKeyDown(keyCode, event);
 				}
-				
+
 				if(key.equals(getIntent().getStringExtra(Intent.EXTRA_SUBJECT)) &&
 						value.equals(getIntent().getStringExtra(Intent.EXTRA_TEXT))){
 					//There is data, but it hasn't been edited!
 					return super.onKeyDown(keyCode, event);
 				}
 			}
-	    	
-	    	AlertDialog.Builder builder = 
+
+			AlertDialog.Builder builder = 
 					new AlertDialog.Builder(EntryActivity.this);
 
 			builder.setTitle("Are you sure?");
-			builder.setMessage("Any data entered will be lost");
+			builder.setMessage("Any changes will be lost");
 
 			builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
@@ -289,10 +333,10 @@ public class EntryActivity extends Activity{
 			});
 
 			builder.create().show();
-	        return true;
-	    }
+			return true;
+		}
 
-	    return super.onKeyDown(keyCode, event);
+		return super.onKeyDown(keyCode, event);
 	}
 
 	private void dismissPopup(){
@@ -305,18 +349,36 @@ public class EntryActivity extends Activity{
 			e.printStackTrace();
 		}
 	}
-	
-	private void setQuickActionListeners(final int pos) {
-		
+
+	private void setQuickActionListeners(final int type, final int pos) {
+
 		mDeleteAction.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v) {
-				mUris.remove(pos);
-				
-				mChangedImage = true;
-				
-				if(mAdapter != null) {
-					mAdapter.notifyDataSetChanged();
+				if(type == IMAGE_GALLERY) {
+					mUris.remove(pos);
+
+					mChangedImage = true;
+
+					if(mImageAdapter != null) {
+						mImageAdapter.notifyDataSetChanged();
+					}
+					
+					if(mUris.size() == 0) {
+						mImageTitle.setVisibility(View.GONE);
+					}
+				} else if(type == FILE_GALLERY) {
+					mFiles.remove(pos);
+
+					mChangedFile = true;
+
+					if(mFileAdapter != null) {
+						mFileAdapter.notifyDataSetChanged();
+					}
+					
+					if(mFiles.size() == 0) {
+						mFileTitle.setVisibility(View.GONE);
+					}
 				}
 				dismissPopup();
 			}
@@ -330,7 +392,7 @@ public class EntryActivity extends Activity{
 			String id = bundle.getString(EXTRA_ID);
 			String uris = bundle.getString(EXTRA_IMG_URI);
 			String files = bundle.getString(EXTRA_FILES);
-			
+
 			if(key != null) {
 				mKeyView.setText(key);
 			}
@@ -347,7 +409,7 @@ public class EntryActivity extends Activity{
 					mUris = new LinkedList<String>(temp);
 				}
 			}
-			
+
 			if(files != null) {
 				List<String> temp = Utils.unjoin(files, " ");
 				if(temp == null) {
@@ -356,7 +418,7 @@ public class EntryActivity extends Activity{
 					mFiles = new LinkedList<String>(temp);
 				}
 			}
-			
+
 			if(id != null) {
 				mExistingId = id;
 			}
@@ -364,22 +426,26 @@ public class EntryActivity extends Activity{
 
 	}
 
-	
+
 	private void setupViews() {
 		if(mUris != null && mUris.size() > 0) {
 			mImageTitle.setVisibility(View.VISIBLE);
 			mImageGallery.setVisibility(View.VISIBLE);
-			
-			mAdapter = new ImageAdapter(this);
-			
-			mImageGallery.setAdapter(mAdapter);
+
+			mImageAdapter = new GalleryAdapter(this, GalleryAdapter.IMAGE_ONLY);
+
+			mImageGallery.setAdapter(mImageAdapter);
 		}
-		
+
 		if(mFiles != null && mFiles.size() > 0) {
 			mFileTitle.setVisibility(View.VISIBLE);
-			//show files here..
+			mFileGallery.setVisibility(View.VISIBLE);
+
+			mFileAdapter = new GalleryAdapter(this, GalleryAdapter.IMAGE_WITH_TEXT);
+
+			mFileGallery.setAdapter(mFileAdapter);
 		}
-		
+
 		mImageGallery.setOnItemClickListener(new OnItemClickListener(){
 			@Override
 			public void onItemClick(AdapterView<?> adapter, View view, int pos,
@@ -390,14 +456,14 @@ public class EntryActivity extends Activity{
 				startActivity(intent);
 			}
 		});
-		
+
 		mImageGallery.setOnItemLongClickListener(new OnItemLongClickListener(){
 			@Override
 			public boolean onItemLongClick(AdapterView<?> adapter, View view, int pos,
 					long arg) {
-				
-				setQuickActionListeners(pos);
-				
+
+				setQuickActionListeners(IMAGE_GALLERY, pos);
+
 				mQuickAction = new QuickAction(view);
 
 				mQuickAction.addActionItem(mDeleteAction);
@@ -405,17 +471,37 @@ public class EntryActivity extends Activity{
 				mQuickAction.setAnimStyle(QuickAction.ANIM_AUTO);
 
 				mQuickAction.show();
-				
+
 				return true;
 			}
 		});
-		
+
+		mFileGallery.setOnItemLongClickListener(new OnItemLongClickListener(){
+			@Override
+			public boolean onItemLongClick(AdapterView<?> adapter, View view, int pos,
+					long arg) {
+
+				setQuickActionListeners(FILE_GALLERY, pos);
+
+				mQuickAction = new QuickAction(view);
+
+				mQuickAction.addActionItem(mDeleteAction);
+
+				mQuickAction.setAnimStyle(QuickAction.ANIM_AUTO);
+
+				mQuickAction.show();
+
+				return true;
+			}
+		});
+
+
 		//Action for deleting images
-		mDeleteAction.setTitle("Delete");
+		mDeleteAction.setTitle("Remove");
 		mDeleteAction.setIcon(Resources.getSystem().getDrawable(android.R.drawable.ic_menu_delete));
-		
+
 	}
-	
+
 	private void setupActionBar() {
 		mActionBar.addAction(new AbstractAction(android.R.drawable.ic_menu_share) {
 			@Override
@@ -432,11 +518,11 @@ public class EntryActivity extends Activity{
 						Toast.makeText(EntryActivity.this, "Nothing to share", 
 								Toast.LENGTH_SHORT).show();
 					}
-					
-					
+
+
 					return;
 				}
-				
+
 				Intent sharingIntent = new Intent(Intent.ACTION_SEND);
 				sharingIntent.setType("text/plain");
 				sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, value);
@@ -444,7 +530,7 @@ public class EntryActivity extends Activity{
 				startActivity(Intent.createChooser(sharingIntent, "Share entry"));
 			}
 		});
-		
+
 		mActionBar.addAction(new AbstractAction(android.R.drawable.ic_menu_save) {
 			@Override
 			public void performAction(View view) {
@@ -495,7 +581,7 @@ public class EntryActivity extends Activity{
 		inflater.inflate(R.menu.entry_menu, menu);
 		return true;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
@@ -510,12 +596,12 @@ public class EntryActivity extends Activity{
 
 			case R.id.menu_document:
 				Intent intent = new Intent(getBaseContext(),
-                        FileActivity.class);
-                intent.putExtra(FileActivity.START_PATH, "/sdcard");
-                startActivityForResult(intent, REQUEST_SAVE);
-				
+						FileActivity.class);
+				intent.putExtra(FileActivity.START_PATH, "/sdcard");
+				startActivityForResult(intent, REQUEST_SAVE);
+
 				return true;
-				
+
 			case R.id.menu_location:
 
 				return true;
@@ -523,15 +609,15 @@ public class EntryActivity extends Activity{
 				return super.onOptionsItemSelected(item);
 		}
 	}
-	
+
 	private void takePhoto(){
 		final Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
 		intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(Utils.getTempFile(this)) );
-		
+
 		startActivityForResult(intent, GET_CAMERA_IMAGE);
 	}
-	
+
 	private void getGalleryPhoto() {
 		Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 		intent.setType("image/*");
@@ -539,41 +625,90 @@ public class EntryActivity extends Activity{
 				GET_GALLERY_IMAGE);
 	}
 
-	public class ImageAdapter extends BaseAdapter {
-	    private Context mContext;
+	public class GalleryAdapter extends BaseAdapter {
+		private Activity mActivity;
 
-	    public ImageAdapter(Context c) {
-	    	mContext = c;
-	    }
+		private int mType;
 
-	    public int getCount() {
-	        return mUris == null ? 0 : mUris.size();
-	    }
+		public static final int IMAGE_ONLY = 0;
 
-	    public Object getItem(int position) {
-	        return null;
-	    }
+		public static final int IMAGE_WITH_TEXT = 1;
 
-	    public long getItemId(int position) {
-	        return 0;
-	    }
+		public GalleryAdapter(Activity a, int type) {
+			mActivity = a;
 
-	    // create a new ImageView for each item referenced by the Adapter
-	    public View getView(int position, View convertView, ViewGroup parent) {
-	        ImageView imageView;
-	        if (convertView == null) {  // if it's not recycled, initialize some attributes
-	            imageView = new ImageView(mContext);
-	            imageView.setLayoutParams(new Gallery.LayoutParams(200, 200));
-	            imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-	            
-	        } else {
-	            imageView = (ImageView) convertView;
-	        }
+			mType = type;
+		}
 
-	        imageView.setImageBitmap(Utils.decodeFile(new File(Utils.getPath(EntryActivity.this, Uri.parse(mUris.get(position))))));
-	        
-	        imageView.setTag(mUris.get(position));
-	        return imageView;
-	    }
+		public int getCount() {
+			if(mType == IMAGE_ONLY) {
+				return mUris == null ? 0 : mUris.size();
+			} else if(mType == IMAGE_WITH_TEXT) {
+				return mFiles == null ? 0 : mFiles.size();
+			} else {
+				return 0;
+			}
+
+		}
+
+		public Object getItem(int position) {
+			return null;
+		}
+
+		public long getItemId(int position) {
+			return 0;
+		}
+
+		// create a new ImageView for each item referenced by the Adapter
+		public View getView(int position, View convertView, ViewGroup parent) {
+			if(mType == IMAGE_ONLY) {
+				ImageView imageView;
+				if (convertView == null) {  // if it's not recycled, initialize some attributes
+					imageView = new ImageView(mActivity);
+					imageView.setLayoutParams(new Gallery.LayoutParams(200, 200));
+					imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+
+				} else {
+					imageView = (ImageView) convertView;
+				}
+
+				imageView.setImageBitmap(Utils.decodeFile(new File(Utils.getPath(mActivity, Uri.parse(mUris.get(position))))));
+
+				imageView.setTag(mUris.get(position));
+
+				return imageView;
+			} else if( mType == IMAGE_WITH_TEXT) {
+				LinearLayout group = null;
+				if(convertView == null) {
+					group = new LinearLayout(EntryActivity.this);
+
+					group.setOrientation(LinearLayout.VERTICAL);
+
+					ImageView image = new ImageView(mActivity);
+					image.setLayoutParams(new Gallery.LayoutParams(200, 200));
+					image.setScaleType(ImageView.ScaleType.FIT_XY);
+
+					TextView text = new TextView(mActivity);
+					text.setLayoutParams(new Gallery.LayoutParams(200, 200));
+
+					group.addView(image);
+					group.addView(text);
+
+				} else {
+					group = (LinearLayout) convertView;
+				}
+
+				ImageView iv = (ImageView) group.getChildAt(0);
+				iv.setImageResource(R.drawable.file_large);
+
+				TextView tv = (TextView) group.getChildAt(1);
+				String file = mFiles.get(position);
+				tv.setText(file.substring(file.lastIndexOf("/") + 1));
+
+				return group;
+			} else {
+				return null;
+			}
+		}
 	}
 }
