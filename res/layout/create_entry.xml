@@ -8,97 +8,79 @@
         android:id="@+id/actionbar"
         style="@style/ActionBarCompat" />
     
-    <LinearLayout
+    <ScrollView
+    	android:id="@+id/scroller"
     	android:layout_width="fill_parent"
-    	android:layout_height="0dip"
-    	android:layout_weight="3"
-    	android:padding="6dip"
-    	android:orientation="vertical">
-	    <TextView 
-	    	android:id="@+id/KeyHeading"
-	    	android:layout_width="fill_parent"
-	    	android:layout_height="wrap_content"
-	    	android:padding="2dip"
-	    	android:textAppearance="@android:style/TextAppearance.Large"
-	    	android:text="Title"/>		   
-	   <EditText  
-	    	android:id="@+id/key"
-		    android:layout_width="fill_parent" 
-		    android:layout_height="0dip"
-		    android:layout_weight="1"
-		    android:imeOptions="actionNext"
-		    android:layout_gravity="center"
-		    android:gravity="top|left"/>
-   </LinearLayout>
-   
-	<LinearLayout
-    	android:layout_width="fill_parent"
-    	android:layout_height="0dip"
-    	android:layout_weight="5"
-    	android:padding="6dip"
-    	android:orientation="vertical">
-	    <TextView 
-	    	android:id="@+id/ValueHeading"
-	    	android:layout_width="fill_parent"
-	    	android:layout_height="wrap_content"
-	    	android:padding="2dip"
-	    	android:textAppearance="@android:style/TextAppearance.Large"
-	    	android:text="Value"/>	
-	    		   
-	   <EditText  
-	    	android:id="@+id/value"
-		    android:layout_width="fill_parent" 
-		    android:layout_height="0dip"
-		    android:layout_weight="1"
-		    android:imeOptions="actionDone"
-		    android:gravity="top|left"/>
-   </LinearLayout>
-   
-   <!-- Bottom Bar -->
-   
-   <LinearLayout
-   	android:id="@+id/attachment_bar"
-   	android:layout_width="fill_parent"
-   	android:layout_height="wrap_content"
-   	android:layout_weight="1"
-   	android:background="#E3E3E3">
-   	
-   		<ImageButton 
-   			android:id="@+id/camera_button"
-   			android:layout_height="fill_parent"
-   			android:layout_width="0dip"
-   			android:layout_weight="1"
-   			android:gravity="center"
-   			android:scaleType="fitCenter"
-   			android:src="@android:drawable/ic_menu_camera"/>
-   
-   		<ImageButton 
-   			android:id="@+id/gallery_button"
-   			android:layout_height="fill_parent"
-   			android:layout_width="0dip"
-   			android:layout_weight="1"
-   			android:gravity="center"
-   			android:scaleType="fitCenter"
-   			android:src="@android:drawable/ic_menu_gallery"/>
-   			
-   		<ImageButton 
-   			android:id="@+id/document_button"
-   			android:layout_height="fill_parent"
-   			android:layout_width="0dip"
-   			android:layout_weight="1"
-   			android:gravity="center"
-   			android:scaleType="fitCenter"
-   			android:src="@drawable/ic_menu_archive"/>
-   			
-   		<ImageButton 
-   			android:id="@+id/location_button"
-   			android:layout_height="fill_parent"
-   			android:layout_width="0dip"
-   			android:layout_weight="1"
-   			android:gravity="center"
-   			android:scaleType="fitCenter"
-   			android:src="@android:drawable/ic_menu_mylocation"/>
-   
-   </LinearLayout>
+    	android:layout_height="fill_parent"
+    	android:fillViewport="true">
+    	
+    	<RelativeLayout
+    		android:id="@+id/container"
+    		android:orientation="vertical"
+    		android:layout_width="fill_parent"
+    		android:layout_height="wrap_content"
+    		android:padding="6dip">
+    		
+		    <TextView 
+		    	android:id="@+id/key_heading"
+		    	android:layout_width="fill_parent"
+		    	android:layout_height="wrap_content"
+		    	android:padding="2dip"
+		    	android:textAppearance="@android:style/TextAppearance.Large"
+		    	android:text="Title"
+		    	android:layout_alignParentTop="true"/>	
+		    		   
+		   <EditText  
+		    	android:id="@+id/key"
+			    android:layout_width="fill_parent" 
+			    android:layout_height="wrap_content"
+			    android:imeOptions="actionNext"
+			    android:layout_gravity="center"
+			    android:gravity="top|left"
+			    android:layout_below="@id/key_heading"/>
 
+		    <TextView 
+		    	android:id="@+id/value_heading"
+		    	android:layout_width="fill_parent"
+		    	android:layout_height="wrap_content"
+		    	android:padding="2dip"
+		    	android:textAppearance="@android:style/TextAppearance.Large"
+		    	android:text="Value"
+		    	android:layout_below="@id/key"/>	
+		    		   
+		   <EditText  
+		    	android:id="@+id/value"
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			    android:imeOptions="actionDone"
+			    android:gravity="top|left" 
+			    android:layout_below="@id/value_heading"
+			    android:minLines="5"/>
+			
+			<TextView 
+		    	android:id="@+id/image_heading"
+		    	android:layout_width="fill_parent"
+		    	android:layout_height="wrap_content"
+		    	android:padding="2dip"
+		    	android:textAppearance="@android:style/TextAppearance.Large"
+		    	android:text="Images"
+		    	android:visibility="gone"
+		    	android:layout_below="@id/value"/>    
+		    	
+		   	<GridView 
+			    android:id="@+id/image_grid"
+			    android:layout_width="fill_parent" 
+			    android:layout_height="wrap_content"
+			    android:columnWidth="90dp"
+			    android:numColumns="auto_fit"
+			    android:verticalSpacing="10dp"
+			    android:horizontalSpacing="10dp"
+			    android:stretchMode="columnWidth"
+			    android:gravity="center"
+			    android:visibility="gone"
+			    android:layout_below="@id/image_heading"/>
+			    
+	   </RelativeLayout>
+	   
+	</ScrollView>
 </LinearLayout>

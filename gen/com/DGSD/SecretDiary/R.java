@@ -110,9 +110,7 @@ containing a value of this type.
         public static final int wave=0x7f02000f;
     }
     public static final class id {
-        public static final int KeyHeading=0x7f0b000d;
-        public static final int ValueHeading=0x7f0b000f;
-        public static final int about=0x7f0b0028;
+        public static final int about=0x7f0b0029;
         public static final int actionbar=0x7f0b000c;
         public static final int actionbar_actions=0x7f0b0008;
         public static final int actionbar_home=0x7f0b0003;
@@ -123,34 +121,37 @@ containing a value of this type.
         public static final int actionbar_item=0x7f0b000b;
         public static final int actionbar_progress=0x7f0b0009;
         public static final int actionbar_title=0x7f0b000a;
-        public static final int arrow_down=0x7f0b0021;
-        public static final int arrow_up=0x7f0b0020;
-        public static final int attachment_bar=0x7f0b0011;
-        public static final int camera_button=0x7f0b0012;
-        public static final int content_box=0x7f0b0016;
-        public static final int date=0x7f0b0018;
-        public static final int document_button=0x7f0b0014;
-        public static final int gallery_button=0x7f0b0013;
-        public static final int help=0x7f0b0027;
-        public static final int hint_button=0x7f0b001d;
+        public static final int arrow_down=0x7f0b001e;
+        public static final int arrow_up=0x7f0b001d;
+        public static final int container=0x7f0b000e;
+        public static final int date=0x7f0b0016;
+        public static final int help=0x7f0b0028;
+        public static final int hint_button=0x7f0b001b;
         public static final int icon=0x7f0b0000;
-        public static final int key=0x7f0b000e;
-        public static final int key_text=0x7f0b0019;
-        public static final int listview=0x7f0b0017;
-        public static final int location_button=0x7f0b0015;
-        public static final int log_out=0x7f0b0026;
-        public static final int password=0x7f0b001c;
-        public static final int password_confirm=0x7f0b0024;
-        public static final int password_hint=0x7f0b0025;
-        public static final int password_strength=0x7f0b0023;
+        public static final int image_grid=0x7f0b0014;
+        public static final int image_heading=0x7f0b0013;
+        public static final int key=0x7f0b0010;
+        public static final int key_heading=0x7f0b000f;
+        public static final int key_text=0x7f0b0017;
+        public static final int listview=0x7f0b0015;
+        public static final int log_out=0x7f0b0027;
+        public static final int menu_camera=0x7f0b0023;
+        public static final int menu_document=0x7f0b0025;
+        public static final int menu_gallery=0x7f0b0024;
+        public static final int menu_location=0x7f0b0026;
+        public static final int password=0x7f0b001a;
+        public static final int password_confirm=0x7f0b0021;
+        public static final int password_hint=0x7f0b0022;
+        public static final int password_strength=0x7f0b0020;
         public static final int screen=0x7f0b0002;
-        public static final int scroller=0x7f0b001e;
+        public static final int scroller=0x7f0b000d;
         public static final int title=0x7f0b0001;
-        public static final int tracks=0x7f0b001f;
-        public static final int unlock=0x7f0b001b;
-        public static final int value=0x7f0b0010;
-        public static final int value_text=0x7f0b001a;
-        public static final int wave=0x7f0b0022;
+        public static final int tracks=0x7f0b001c;
+        public static final int unlock=0x7f0b0019;
+        public static final int value=0x7f0b0012;
+        public static final int value_heading=0x7f0b0011;
+        public static final int value_text=0x7f0b0018;
+        public static final int wave=0x7f0b001f;
     }
     public static final class layout {
         public static final int action_item=0x7f030000;
@@ -164,7 +165,8 @@ containing a value of this type.
         public static final int setup=0x7f030008;
     }
     public static final class menu {
-        public static final int entrylist_menu=0x7f0a0000;
+        public static final int entry_menu=0x7f0a0000;
+        public static final int entrylist_menu=0x7f0a0001;
     }
     public static final class string {
         public static final int app_name=0x7f080001;

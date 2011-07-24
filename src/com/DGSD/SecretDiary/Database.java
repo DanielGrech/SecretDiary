@@ -27,6 +27,8 @@ public class Database {
 
 	public static final String C_DATE = "date";
 	
+	public static final String C_IMG_URI = "image_uris";
+	
 	public static final String ORDER_BY_DATE = C_DATE + " DESC";
 
 	private SQLiteDatabase mDatabase;
@@ -97,6 +99,7 @@ public class Database {
 			db.execSQL("CREATE TABLE " + TABLE_NAME + " (" + 
 					C_ID + " INTEGER PRIMARY KEY, " + 
 					C_DATE + " text, " + 
+					C_IMG_URI + " text, " +
 					C_KEY + " text, " + 
 					C_VALUE + " text)");
 		}

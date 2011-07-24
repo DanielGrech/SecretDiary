@@ -42,7 +42,8 @@
        	</activity>
 
 		<activity android:name=".Activities.EntryActivity"
-        	android:label="New Entry" />
+        	android:label="New Entry" 
+        	android:windowSoftInputMode="stateHidden|adjustResize|adjustPan"/>
         	
         	<activity android:name=".Activities.SearchActivity"
         		android:label="Search" >

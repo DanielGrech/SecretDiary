@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/menu_camera"
+        android:title="Take picture"
+        android:icon="@android:drawable/ic_menu_camera"/>
+
+    <item android:id="@+id/menu_gallery"
+        android:title="Attach picture"
+        android:icon="@android:drawable/ic_menu_gallery"/> 
+        
+    <item android:id="@+id/menu_document"
+        android:title="Attach File"
+        android:icon="@drawable/ic_menu_archive"/>    
+        
+    <item android:id="@+id/menu_location"
+        android:title="Get Location"
+        android:icon="@android:drawable/ic_menu_mylocation"/>   
+</menu>
