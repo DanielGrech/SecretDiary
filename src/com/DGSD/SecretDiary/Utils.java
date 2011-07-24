@@ -12,6 +12,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -159,6 +161,36 @@ public class Utils {
 		} catch (FileNotFoundException e) {}
 		return null;
 	}
+	
+	public static Location getLocation(Context c, int minDistance, long minTime) {
+		Location bestResult = null;
+		float bestAccuracy = Float.MAX_VALUE;
+		long bestTime = Long.MIN_VALUE;
+
+		LocationManager lm = (LocationManager) c.getSystemService(Context.LOCATION_SERVICE);
+		
+		List<String> matchingProviders = lm.getAllProviders();
+		for (String provider: matchingProviders) {
+			Location location = lm.getLastKnownLocation(provider);
+			if (location != null) {
+				float accuracy = location.getAccuracy();
+				long time = location.getTime();
+
+				if ((time > minTime && accuracy < bestAccuracy)) {
+					bestResult = location;
+					bestAccuracy = accuracy;
+					bestTime = time;
+				}
+				else if (time < minTime && bestAccuracy == Float.MAX_VALUE && time > bestTime) {
+					bestResult = location;
+					bestTime = time;
+				}
+			}
+		}
+
+		return bestResult;
+	}
+
 
 	public static class Password {
 		public static final int WEAK = 0;

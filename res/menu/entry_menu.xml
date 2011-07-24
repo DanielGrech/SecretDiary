@@ -10,10 +10,16 @@
         android:icon="@android:drawable/ic_menu_gallery"/> 
         
     <item android:id="@+id/menu_document"
-        android:title="Attach File"
+        android:title="Attach file"
         android:icon="@drawable/ic_menu_archive"/>    
         
     <item android:id="@+id/menu_location"
-        android:title="Get Location"
-        android:icon="@android:drawable/ic_menu_mylocation"/>   
+        android:title="Add current location"
+        android:icon="@android:drawable/ic_menu_mylocation"/>  
+        
+    <item android:id="@+id/menu_remove_location"
+        android:title="Remove location"
+        android:enabled="false"
+        android:visible="false"
+        android:icon="@android:drawable/ic_menu_delete"/> 
 </menu>

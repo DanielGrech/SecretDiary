@@ -74,11 +74,16 @@ public class EntryListActivity extends Activity{
 		setupListView();
 
 		setupQuickActions();
-		
-		mCurrentLoadingTask = new LoadEntriesTask();
-		mCurrentLoadingTask.execute();
 	}
 
+	@Override
+	public void onStart() {
+		super.onStart();
+		mCurrentLoadingTask = new LoadEntriesTask();
+		
+		mCurrentLoadingTask.execute();
+	}
+	
 	@Override
 	public void onPause() {
 		super.onPause();
@@ -108,12 +113,6 @@ public class EntryListActivity extends Activity{
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.entrylist_menu, menu);
 		return true;
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu (Menu menu) {
-		//Dynamically alter menu items..
-		return super.onPrepareOptionsMenu(menu);
 	}
 
 	@Override
@@ -175,6 +174,8 @@ public class EntryListActivity extends Activity{
 				intent.putExtra(Intent.EXTRA_TEXT, vh.value);
 				intent.putExtra(EntryActivity.EXTRA_IMG_URI, vh.imgUri);
 				intent.putExtra(EntryActivity.EXTRA_FILES, vh.files);
+				intent.putExtra(EntryActivity.EXTRA_LAT, vh.lat);
+				intent.putExtra(EntryActivity.EXTRA_LONG, vh.lon);
 
 				startActivity(intent);
 
@@ -330,6 +331,15 @@ public class EntryListActivity extends Activity{
 	}
 
 	private class LoadEntriesTask extends AsyncTask<Void, Void, Void> {
+		private int dateCol;
+		private int idCol;
+		private int keyCol;
+		private int valCol;
+		private int imgCol;
+		private int fileCol;
+		private int latCol;
+		private int lonCol;
+		
 		private Cursor mCursor;
 
 		private boolean hasError;
@@ -351,6 +361,16 @@ public class EntryListActivity extends Activity{
 		@Override
 		protected Void doInBackground(Void... params) {
 			mCursor = mApplication.getDatabase().getAll(Database.TABLE_NAME);
+			
+			dateCol = mCursor.getColumnIndex(Database.C_DATE);
+			idCol = mCursor.getColumnIndex(Database.C_ID);
+			keyCol = mCursor.getColumnIndex(Database.C_KEY);
+			valCol = mCursor.getColumnIndex(Database.C_VALUE);
+			imgCol = mCursor.getColumnIndex(Database.C_IMG_URI);
+			fileCol = mCursor.getColumnIndex(Database.C_FILES);
+			latCol = mCursor.getColumnIndex(Database.C_LAT);
+			lonCol = mCursor.getColumnIndex(Database.C_LONG);
+			
 			if(mCursor == null) {
 				hasError = true;
 			}
@@ -372,12 +392,7 @@ public class EntryListActivity extends Activity{
 
 					mAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
 						public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-							final int dateCol = cursor.getColumnIndex(Database.C_DATE);
-							final int idCol = cursor.getColumnIndex(Database.C_ID);
-							final int keyCol = cursor.getColumnIndex(Database.C_KEY);
-							final int valCol = cursor.getColumnIndex(Database.C_VALUE);
-							final int imgCol = cursor.getColumnIndex(Database.C_IMG_URI);
-							final int fileCol = cursor.getColumnIndex(Database.C_FILES);
+							
 
 							final String pword = mApplication.getPassword();
 
@@ -394,7 +409,9 @@ public class EntryListActivity extends Activity{
 													Encryption.decrypt(pword, cursor.getString(valCol)), 
 													cursor.getString(dateCol),
 													Encryption.decrypt(pword,  cursor.getString(imgCol)),
-													Encryption.decrypt(pword,  cursor.getString(fileCol))));
+													Encryption.decrypt(pword,  cursor.getString(fileCol)),
+													Encryption.decrypt(pword, cursor.getString(latCol)),
+													Encryption.decrypt(pword, cursor.getString(lonCol))));
 								} catch (Exception e) {
 									Toast.makeText(EntryListActivity.this, "Error decrypting values", 
 											Toast.LENGTH_SHORT).show();
@@ -447,14 +464,19 @@ public class EntryListActivity extends Activity{
 		public String date;
 		public String imgUri;
 		public String files;
+		public String lat;
+		public String lon;
 
-		public ViewHolder(String i, String k, String v, String d, String u, String f) {
+		public ViewHolder(String i, String k, String v, String d, 
+				String u, String f, String la, String lo) {
 			id = i;
 			key = k;
 			value = v;
 			date = d;
 			imgUri = u;
 			files = f;
+			lat = la;
+			lon = lo;
 		}
 	}
 

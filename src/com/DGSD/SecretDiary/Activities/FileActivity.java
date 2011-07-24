@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.DGSD.SecretDiary.R;
+import com.DGSD.SecretDiary.ActionBar.ActionBar;
 
 public class FileActivity extends ListActivity {
 
@@ -54,7 +55,11 @@ public class FileActivity extends ListActivity {
 		setResult(RESULT_CANCELED, getIntent());
 
 		setContentView(R.layout.file_dialog_main);
+		
 		myPath = (TextView) findViewById(R.id.path);
+		
+		ActionBar mActionBar = (ActionBar) findViewById(R.id.actionbar);
+		mActionBar.setTitle("Choose a file");
 		
 		getListView().setOnItemLongClickListener(new OnItemLongClickListener(){
 			@Override

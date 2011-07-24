@@ -113,7 +113,7 @@ containing a value of this type.
         public static final int wave=0x7f020012;
     }
     public static final class id {
-        public static final int about=0x7f0b0030;
+        public static final int about=0x7f0b0031;
         public static final int actionbar=0x7f0b000c;
         public static final int actionbar_actions=0x7f0b0008;
         public static final int actionbar_home=0x7f0b0003;
@@ -133,7 +133,7 @@ containing a value of this type.
         public static final int fdrowtext=0x7f0b001f;
         public static final int file_gallery=0x7f0b0016;
         public static final int file_heading=0x7f0b0015;
-        public static final int help=0x7f0b002f;
+        public static final int help=0x7f0b0030;
         public static final int hint_button=0x7f0b0022;
         public static final int icon=0x7f0b0000;
         public static final int image_gallery=0x7f0b0014;
@@ -142,11 +142,12 @@ containing a value of this type.
         public static final int key_heading=0x7f0b000f;
         public static final int key_text=0x7f0b0019;
         public static final int listview=0x7f0b0017;
-        public static final int log_out=0x7f0b002e;
+        public static final int log_out=0x7f0b002f;
         public static final int menu_camera=0x7f0b002a;
         public static final int menu_document=0x7f0b002c;
         public static final int menu_gallery=0x7f0b002b;
         public static final int menu_location=0x7f0b002d;
+        public static final int menu_remove_location=0x7f0b002e;
         public static final int password=0x7f0b0021;
         public static final int password_confirm=0x7f0b0028;
         public static final int password_hint=0x7f0b0029;

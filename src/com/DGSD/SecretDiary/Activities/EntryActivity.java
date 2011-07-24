@@ -6,10 +6,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.location.Location;
+import android.location.LocationListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -21,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -34,6 +39,7 @@ import android.widget.Toast;
 
 import com.DGSD.SecretDiary.DiaryApplication;
 import com.DGSD.SecretDiary.GalleryExt;
+import com.DGSD.SecretDiary.LocationFinder;
 import com.DGSD.SecretDiary.R;
 import com.DGSD.SecretDiary.Utils;
 import com.DGSD.SecretDiary.ActionBar.ActionBar;
@@ -50,6 +56,10 @@ public class EntryActivity extends Activity{
 	public static final String EXTRA_IMG_URI = "extra_img_uri";
 
 	public static final String EXTRA_FILES = "extra_files";
+
+	public static final String EXTRA_LAT = "extra_latitude";
+	
+	public static final String EXTRA_LONG = "extra_longitude";
 
 	private static final int GET_CAMERA_IMAGE = 0;
 
@@ -81,6 +91,8 @@ public class EntryActivity extends Activity{
 
 	private List<String> mFiles;
 
+	private double[] mLocation;
+	
 	private GalleryAdapter mImageAdapter;
 
 	private GalleryAdapter mFileAdapter;
@@ -89,8 +101,12 @@ public class EntryActivity extends Activity{
 
 	private boolean mChangedFile;
 
+	private boolean mChangedLocation;
+	
 	private QuickAction mQuickAction;
 
+	private LocationFinder mLocationFinder;
+	
 	//Action to delete an image
 	private final ActionItem mDeleteAction = new ActionItem();
 
@@ -121,15 +137,67 @@ public class EntryActivity extends Activity{
 		mUris = new LinkedList<String>();
 
 		mFiles = new LinkedList<String>();
+		
+		mLocation = new double[]{-1.0, -1.0};
+		
+		mLocationFinder = new LocationFinder(this);
+		
+		mLocationFinder.setChangedLocationListener(new LocationListener(){
+			@Override
+			public void onLocationChanged(Location location) {
+				System.err.println("Location changed to: " + location.getLatitude() + " " + location.getLongitude());
+				
+				if(mActionBar != null) {
+					mActionBar.setProgressBarVisibility(View.GONE);
+				}
+				
+				//We are updating the location!
+				mChangedLocation = true;
+				
+				mLocation[0] = location.getLatitude();
+				mLocation[1] = location.getLongitude();
+				
+				if(mActionBar.getActionCount() < 3) {
+					//We need to show the action
+					mActionBar.addAction(getLocationAction(), 0);
+				}
+			}
 
-		extractDataFromIntent(getIntent().getExtras());
+			@Override
+			public void onProviderDisabled(String provider) {
+				if(mActionBar != null) {
+					mActionBar.setProgressBarVisibility(View.GONE);
+				}
+			}
+
+			@Override
+			public void onProviderEnabled(String provider) {
+				if(mActionBar != null) {
+					mActionBar.setProgressBarVisibility(View.GONE);
+				}
+			}
+
+			@Override
+			public void onStatusChanged(String provider, int status, Bundle extras) {
+				if(mActionBar != null) {
+					mActionBar.setProgressBarVisibility(View.GONE);
+				}
+			}
+		});
+
+		extractData(getIntent().getExtras());
 
 		if(savedInstanceState != null) {
 			mChangedImage = savedInstanceState.getBoolean("changed_image", true);
 			mChangedFile = savedInstanceState.getBoolean("changed_file", true);
+			mChangedLocation = savedInstanceState.getBoolean("changed_location", true);
 
 			mKeyView.setText(savedInstanceState.getString("key"));
 			mKeyView.setText(savedInstanceState.getString("value"));
+			
+			mLocation[0] = savedInstanceState.getDouble("latitude", -1.0);
+			mLocation[1] = savedInstanceState.getDouble("longitude", -1.0);
+			
 			List<String> tempUris = Utils.unjoin(savedInstanceState.getString("uris"), " ");
 			List<String> tempFiles = Utils.unjoin(savedInstanceState.getString("files"), " ");
 
@@ -145,10 +213,6 @@ public class EntryActivity extends Activity{
 				mFiles = new LinkedList<String>(tempFiles);
 			}
 		}
-
-		setupViews();
-
-		setupActionBar();
 	}
 
 	@Override
@@ -166,8 +230,21 @@ public class EntryActivity extends Activity{
 		outState.putBoolean("changed_image", mChangedImage);
 
 		outState.putBoolean("changed_file", mChangedFile);
+		
+		outState.putBoolean("changed_location", mChangedLocation);
+		
+		outState.putDouble("latitude", mLocation[0]);
+		
+		outState.putDouble("longitude", mLocation[1]);
 	}
 
+	@Override
+	public void onStart() {
+		super.onStart();
+		setupViews();
+		setupActionBar();
+	}
+	
 
 	@Override
 	public void onStop() {
@@ -175,6 +252,10 @@ public class EntryActivity extends Activity{
 
 		mFileAdapter = null;
 
+		if(mLocationFinder != null) {
+			mLocationFinder.cancel();
+		}
+		
 		super.onStop();
 	}
 
@@ -299,8 +380,8 @@ public class EntryActivity extends Activity{
 			String key = mKeyView.getText().toString();
 			String value = mValueView.getText().toString();
 
-			//If we have added an image or file, we definitely want to ask..
-			if(!mChangedImage && !mChangedFile) {
+			//If we have added an image or file or location, we definitely want to ask..
+			if(!mChangedImage && !mChangedFile && !mChangedLocation) {
 				if((key == null || key.length() == 0) && 
 						(value == null || value.length() == 0) ) {
 					//There is no data, so let them exit
@@ -350,6 +431,7 @@ public class EntryActivity extends Activity{
 		}
 	}
 
+	
 	private void setQuickActionListeners(final int type, final int pos) {
 
 		mDeleteAction.setOnClickListener(new OnClickListener(){
@@ -385,13 +467,16 @@ public class EntryActivity extends Activity{
 		});
 	}
 
-	private void extractDataFromIntent(Bundle bundle) {
+	
+	private void extractData(Bundle bundle) {
 		if(bundle != null) {
 			String key = bundle.getString(Intent.EXTRA_SUBJECT);
 			String val = bundle.getString(Intent.EXTRA_TEXT);
 			String id = bundle.getString(EXTRA_ID);
 			String uris = bundle.getString(EXTRA_IMG_URI);
 			String files = bundle.getString(EXTRA_FILES);
+			String lat = bundle.getString(EXTRA_LAT);
+			String lon = bundle.getString(EXTRA_LONG);
 
 			if(key != null) {
 				mKeyView.setText(key);
@@ -419,13 +504,21 @@ public class EntryActivity extends Activity{
 				}
 			}
 
+			if(lat != null && lon != null) {
+				try{
+					mLocation[0] = Double.valueOf(lat);
+					mLocation[1] = Double.valueOf(lon);
+				} catch(NumberFormatException e) {
+					e.printStackTrace();
+				}
+			}
+			
 			if(id != null) {
 				mExistingId = id;
 			}
 		}
 
 	}
-
 
 	private void setupViews() {
 		if(mUris != null && mUris.size() > 0) {
@@ -450,10 +543,16 @@ public class EntryActivity extends Activity{
 			@Override
 			public void onItemClick(AdapterView<?> adapter, View view, int pos,
 					long arg) {
-				Intent intent = new Intent();
-				intent.setAction(Intent.ACTION_VIEW);
-				intent.setDataAndType(Uri.parse(mUris.get(pos)), "image/*");
-				startActivity(intent);
+				try {
+					Intent intent = new Intent();
+					intent.setAction(Intent.ACTION_VIEW);
+					intent.setDataAndType(Uri.parse(mUris.get(pos)), "image/*");
+					startActivity(intent);
+				}catch(ActivityNotFoundException e) {
+					e.printStackTrace();
+					Toast.makeText(EntryActivity.this, "Can't find an application to open this file", 
+							Toast.LENGTH_LONG).show();
+				}
 			}
 		});
 
@@ -473,6 +572,27 @@ public class EntryActivity extends Activity{
 				mQuickAction.show();
 
 				return true;
+			}
+		});
+		
+		mFileGallery.setOnItemClickListener(new OnItemClickListener(){
+			@Override
+			public void onItemClick(AdapterView<?> adapter, View view, int pos,
+					long arg) {
+				Intent intent = new Intent();
+				intent.setAction(Intent.ACTION_VIEW);
+				try {
+					final String file = mFiles.get(pos);
+					String ext = file.substring(file.lastIndexOf(".") + 1);
+					System.err.println("EXTENSION: " + ext);
+					intent.setDataAndType(Uri.fromFile(new File(file)),
+							MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext));
+					startActivity(intent);
+				} catch(Exception e) {
+					e.printStackTrace();
+					Toast.makeText(EntryActivity.this, "Can't find an application to open this file", 
+							Toast.LENGTH_LONG).show();
+				}
 			}
 		});
 
@@ -503,6 +623,13 @@ public class EntryActivity extends Activity{
 	}
 
 	private void setupActionBar() {
+		mActionBar.setTitle("Secret Entry");
+		
+		if(Double.compare(mLocation[0],-1.0) != 0 && 
+				Double.compare(mLocation[1],-1.0) != 0) {
+			mActionBar.addAction(getLocationAction(), 0);
+		}
+		
 		mActionBar.addAction(new AbstractAction(android.R.drawable.ic_menu_share) {
 			@Override
 			public void performAction(View view) {
@@ -547,7 +674,7 @@ public class EntryActivity extends Activity{
 
 				if(mExistingId != null) {
 					//We are updating an old entry!
-					if(mApplication.updateEntry(Integer.valueOf(mExistingId), key, value, Utils.join(mUris," "), Utils.join(mFiles," ")) > 0) {
+					if(mApplication.updateEntry(Integer.valueOf(mExistingId), key, value, Utils.join(mUris," "), Utils.join(mFiles," "), mLocation) > 0) {
 						Toast.makeText(EntryActivity.this, "Entry Updated!", 
 								Toast.LENGTH_SHORT).show();
 
@@ -559,7 +686,7 @@ public class EntryActivity extends Activity{
 
 				} else {
 					//We are adding a brand new entry!
-					if(mApplication.addEntry(key, value, Utils.join(mUris," "), Utils.join(mFiles," ")) == true) {
+					if(mApplication.addEntry(key, value, Utils.join(mUris," "), Utils.join(mFiles," "), mLocation) == true) {
 						Toast.makeText(EntryActivity.this, "New entry created!", 
 								Toast.LENGTH_SHORT).show();
 
@@ -574,7 +701,17 @@ public class EntryActivity extends Activity{
 
 	}
 
-
+	private AbstractAction getLocationAction() {
+		return new AbstractAction(android.R.drawable.ic_dialog_map) {
+			@Override
+			public void performAction(View view) {
+				String location_uri = "geo:" + mLocation[0] + "," + mLocation[1];
+				Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(location_uri));
+				startActivity(intent);
+			}
+		};
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
@@ -582,6 +719,22 @@ public class EntryActivity extends Activity{
 		return true;
 	}
 
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		if(Double.compare(mLocation[0],-1.0) != 0 && 
+				Double.compare(mLocation[1],-1.0) != 0) {
+			
+			menu.getItem(3).setTitle("Update location");
+			
+			menu.getItem(4).setEnabled(true).setVisible(true);
+		} else {
+			menu.getItem(4).setEnabled(false).setVisible(false);
+			menu.getItem(3).setTitle("Add current location");
+		}
+		
+		return super.onPrepareOptionsMenu(menu);
+	}
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
@@ -603,13 +756,51 @@ public class EntryActivity extends Activity{
 				return true;
 
 			case R.id.menu_location:
-
+				//Check for location within the last <given interval>
+				Location location = mLocationFinder.getLastBestLocation(1000, 
+						System.currentTimeMillis() - AlarmManager.INTERVAL_HALF_HOUR);
+				
+				if(location == null) {
+					//We should already be getting a more accurate location..
+					mActionBar.setProgressBarVisibility(View.VISIBLE);
+				} else {
+					mChangedLocation = true;
+					
+					if(Double.compare(mLocation[0], -1.0) == 0 && 
+							Double.compare(mLocation[1], -1.0) == 0) {
+						//We haven't got our location before..
+						mLocation[0] = location.getLatitude();
+						mLocation[1] = location.getLongitude();
+						
+						mActionBar.addAction(getLocationAction(), 0);
+					} else {
+						//We should already be showing the ActionBar button..
+						System.err.println("BEFORE: " + mLocation[0] + " " + mLocation[1]);
+						
+						mLocation[0] = location.getLatitude();
+						mLocation[1] = location.getLongitude();
+					}
+				}
+				
 				return true;
+				
+			case R.id.menu_remove_location:
+				if(mActionBar.getActionCount() > 2) {
+					mActionBar.removeActionAt(0);
+				}
+				
+				mChangedLocation = true;
+				mLocation[0] = -1.0;
+				mLocation[1] = -1.0;
+				
+				return true;
+				
 			default:
 				return super.onOptionsItemSelected(item);
 		}
 	}
 
+	
 	private void takePhoto(){
 		final Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
@@ -617,14 +808,18 @@ public class EntryActivity extends Activity{
 
 		startActivityForResult(intent, GET_CAMERA_IMAGE);
 	}
+	
 
+	
 	private void getGalleryPhoto() {
 		Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 		intent.setType("image/*");
 		startActivityForResult(Intent.createChooser(intent,"Select Picture"), 
 				GET_GALLERY_IMAGE);
 	}
+	
 
+	
 	public class GalleryAdapter extends BaseAdapter {
 		private Activity mActivity;
 
