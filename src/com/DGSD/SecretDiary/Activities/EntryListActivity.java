@@ -169,13 +169,15 @@ public class EntryListActivity extends Activity{
 				Intent intent = new Intent(EntryListActivity.this, 
 						EntryActivity.class);
 
-				intent.putExtra(EntryActivity.EXTRA_ID, vh.id);
-				intent.putExtra(Intent.EXTRA_SUBJECT, vh.key);
-				intent.putExtra(Intent.EXTRA_TEXT, vh.value);
-				intent.putExtra(EntryActivity.EXTRA_IMG_URI, vh.imgUri);
-				intent.putExtra(EntryActivity.EXTRA_FILES, vh.files);
-				intent.putExtra(EntryActivity.EXTRA_LAT, vh.lat);
-				intent.putExtra(EntryActivity.EXTRA_LONG, vh.lon);
+				if(vh != null) {
+					intent.putExtra(EntryActivity.EXTRA_ID, vh.id);
+					intent.putExtra(Intent.EXTRA_SUBJECT, vh.key);
+					intent.putExtra(Intent.EXTRA_TEXT, vh.value);
+					intent.putExtra(EntryActivity.EXTRA_IMG_URI, vh.imgUri);
+					intent.putExtra(EntryActivity.EXTRA_FILES, vh.files);
+					intent.putExtra(EntryActivity.EXTRA_LAT, vh.lat);
+					intent.putExtra(EntryActivity.EXTRA_LONG, vh.lon);
+				}
 
 				mActionBar.setProgressBarVisibility(View.VISIBLE);
 				
@@ -415,9 +417,13 @@ public class EntryListActivity extends Activity{
 													Encryption.decrypt(pword, cursor.getString(latCol)),
 													Encryption.decrypt(pword, cursor.getString(lonCol))));
 								} catch (Exception e) {
-									Toast.makeText(EntryListActivity.this, "Error decrypting values", 
+									Toast.makeText(EntryListActivity.this, "Please enter password again", 
 											Toast.LENGTH_SHORT).show();
+									
 									e.printStackTrace();
+									startActivity(new Intent(EntryListActivity.this, LoginActivity.class));
+									finish();
+									
 								}
 
 								return true;

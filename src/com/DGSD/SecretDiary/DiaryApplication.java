@@ -1,7 +1,5 @@
 /*
  * TODO:
- * 		Add location
- * 		Add photo/video
  * 		Backup manager
  * 		Search
  * 		Tags for each note
